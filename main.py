@@ -16,6 +16,21 @@ link = []
 option = ''
 mp3_option = False
 
+
+def mp3_conversion():
+    print("\n")
+    for file in os.listdir(SAVE_PATH):
+        if re.search('mp4', file):
+            try:
+                mp4_file = os.path.join(SAVE_PATH, file)
+                mp3_file = os.path.join(SAVE_PATH, os.path.splitext(file)[0] + '.mp3')
+                new_file = mp.AudioFileClip(mp4_file)
+                new_file.write_audiofile(mp3_file)
+                os.remove(mp4_file)
+            except (RuntimeError, Exception):
+                print("Fuck... failed to convert file \"" + file + "\"")
+
+
 flag = input("Do you want to specify the download folder? Default is your current working directory [Y/n]: ")
 if flag == "y" or flag == "Y":
     SAVE_PATH = input("Enter a directory [Example: /home/user_name/Desktop]: ")
@@ -61,26 +76,7 @@ if option == '1':
             except (RuntimeError, Exception):
                 print("Fuck... failed to download file \"" + current.title + "\"")
 
-        print("\n")
-
-        for file in os.listdir(SAVE_PATH):
-            try:
-                mp4_file = os.path.join(SAVE_PATH, file)
-                mp3_file = os.path.join(SAVE_PATH, os.path.splitext(file)[0] + '.mp3')
-                new_file = mp.AudioFileClip(mp4_file)
-                new_file.write_audiofile(mp3_file)
-                os.remove(mp4_file)
-            except (RuntimeError, Exception):
-                print("Fuck... failed to convert file \"" + file + "\"")
-
-
-def fix_duration(file_path):
-    temp_filepath = file_path[:len(file_path) - len('.mp3')] + '_temp' + '.mp3'
-    os.rename(file_path, temp_filepath)
-    command = 'ffmpeg -v quiet -i "' + temp_filepath + '" -acodec copy "' + file_path + '"'
-    os.system(command)
-    os.remove(temp_filepath)
-
+        mp3_conversion()
 
 if option == '2':
 
@@ -111,24 +107,9 @@ if option == '2':
                 yt = YouTube(i)
                 print("Downloading: " + i)
                 out_file = yt.streams.filter(only_audio=True).first().download(SAVE_PATH)
-
-                # old method of converting to mp3
-                # base, ext = os.path.splitext(out_file)
-                # new_file = base + '.mp3'
-                # os.rename(out_file, new_file)
-                # fix_duration(base + ".mp3") # needed once and never again??? not sure what's going on here lol
             except (RuntimeError, Exception):
                 print("Fuck... failed to download file \"" + i + "\"")
 
-        for file in os.listdir(SAVE_PATH):
-            if re.search('mp4', file):
-                try:
-                    mp4_file = os.path.join(SAVE_PATH, file)
-                    mp3_file = os.path.join(SAVE_PATH, os.path.splitext(file)[0] + '.mp3')
-                    new_file = mp.AudioFileClip(mp4_file)
-                    new_file.write_audiofile(mp3_file)
-                    os.remove(mp4_file)
-                except (RuntimeError, Exception):
-                    print("Fuck... failed to convert file \"" + file + "\"")
+        mp3_conversion()
 
 print("\nProgram has concluded.")
